@@ -2,7 +2,9 @@ import { useState, useEffect, useRef } from 'react'
 import { X, Trash2, Download, Code2, FunctionSquare, Clock, Edit3, Check } from 'lucide-react'
 
 function relativeTime(iso) {
-  const diff = Date.now() - new Date(iso).getTime()
+  const ts = new Date(iso).getTime()
+  if (!isFinite(ts)) return 'unknown'
+  const diff = Date.now() - ts
   const mins = Math.floor(diff / 60000)
   if (mins < 1) return 'just now'
   if (mins < 60) return `${mins}m ago`
@@ -10,23 +12,27 @@ function relativeTime(iso) {
   if (hrs < 24) return `${hrs}h ago`
   const days = Math.floor(hrs / 24)
   if (days < 30) return `${days}d ago`
-  return new Date(iso).toLocaleDateString()
+  return new Date(ts).toLocaleDateString()
 }
 
 function SaveRow({ save, onLoad, onDelete, onRename }) {
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState(save.name)
   const inputRef = useRef(null)
+  const committingRef = useRef(false)
 
   useEffect(() => {
     if (editing) inputRef.current?.select()
   }, [editing])
 
   function commitRename() {
+    if (committingRef.current) return
+    committingRef.current = true
     const trimmed = draft.trim()
     if (trimmed && trimmed !== save.name) onRename(save.id, trimmed)
     else setDraft(save.name)
     setEditing(false)
+    committingRef.current = false
   }
 
   const preview = save.mode === 'formula'
@@ -64,18 +70,18 @@ function SaveRow({ save, onLoad, onDelete, onRename }) {
         {/* Actions */}
         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
           {editing ? (
-            <button onClick={commitRename} className="p-1 text-emerald-400 hover:text-emerald-300" title="Save name">
+            <button onClick={commitRename} aria-label="Confirm rename" className="p-1 text-emerald-400 hover:text-emerald-300" title="Save name">
               <Check size={13} />
             </button>
           ) : (
-            <button onClick={() => setEditing(true)} className="p-1 text-gray-500 hover:text-gray-300" title="Rename">
+            <button onClick={() => setEditing(true)} aria-label="Rename" className="p-1 text-gray-500 hover:text-gray-300" title="Rename">
               <Edit3 size={13} />
             </button>
           )}
-          <button onClick={() => onLoad(save)} className="p-1 text-indigo-400 hover:text-indigo-300" title="Load">
+          <button onClick={() => onLoad(save)} aria-label="Load save" className="p-1 text-indigo-400 hover:text-indigo-300" title="Load">
             <Download size={13} />
           </button>
-          <button onClick={() => onDelete(save.id)} className="p-1 text-gray-500 hover:text-red-400" title="Delete">
+          <button onClick={() => onDelete(save.id)} aria-label="Delete save" className="p-1 text-gray-500 hover:text-red-400" title="Delete">
             <Trash2 size={13} />
           </button>
         </div>
@@ -105,6 +111,15 @@ export default function SavesPanel({ isOpen, onClose, saves, onSave, onLoad, onD
     }
   }, [isOpen])
 
+  useEffect(() => {
+    if (!isOpen) return
+    function onKeyDown(e) {
+      if (e.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [isOpen, onClose])
+
   function handleSave() {
     const trimmed = name.trim()
     if (!trimmed) return
@@ -123,13 +138,18 @@ export default function SavesPanel({ isOpen, onClose, saves, onSave, onLoad, onD
       )}
 
       {/* Drawer */}
-      <div className={`fixed top-0 right-0 bottom-0 z-50 w-80 flex flex-col bg-gray-900 border-l border-gray-800 shadow-2xl transition-transform duration-200 ${
-        isOpen ? 'translate-x-0' : 'translate-x-full'
-      }`}>
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Saved snippets"
+        className={`fixed top-0 right-0 bottom-0 z-50 w-80 flex flex-col bg-gray-900 border-l border-gray-800 shadow-2xl transition-transform duration-200 ${
+          isOpen ? 'translate-x-0' : 'translate-x-full'
+        }`}
+      >
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-800">
           <span className="text-sm font-semibold text-white">Saved</span>
-          <button onClick={onClose} className="p-1 text-gray-500 hover:text-gray-300 transition-colors">
+          <button onClick={onClose} aria-label="Close saved snippets panel" className="p-1 text-gray-500 hover:text-gray-300 transition-colors">
             <X size={16} />
           </button>
         </div>

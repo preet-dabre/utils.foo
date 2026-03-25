@@ -49,7 +49,7 @@ export default function FormulaMode({ formula, onFormulaChange, vars, onVarsChan
     })
 
     setSweepVar(prev => detected.includes(prev) ? prev : (detected[0] ?? ''))
-  }, [formula])
+  }, [formula, onVarsChange])
 
   // Evaluate live
   useEffect(() => {

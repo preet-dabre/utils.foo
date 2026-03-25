@@ -17,7 +17,7 @@ export default defineConfig({
           icons: ['lucide-react', 'react-icons'],
           utils: ['date-fns', 'json5', 'jsqr', 'qrcode.react'],
           analytics: ['react-ga4', 'react-helmet-async'],
-          visualizer: ['react-live', 'recharts', 'mathjs']
+          visualizer: ['react-live', 'mathjs', 'sucrase']
         }
       }
     },

@@ -1,6 +1,12 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo, useReducer } from 'react'
 import { LiveProvider } from 'react-live'
-import * as LucideIcons from 'lucide-react'
+import {
+  ArrowRight, ArrowLeft, ArrowUp, ArrowDown, Check, X, Plus, Minus,
+  Search, Settings, Home, User, Bell, Mail, Heart, Star, Trash2, Edit3,
+  Download, Upload, Copy, ExternalLink, ChevronRight, ChevronLeft,
+  ChevronDown, ChevronUp, Info, AlertCircle, Zap, Code2, FileText,
+  Folder, Image, Lock, RefreshCw, Eye, EyeOff, Menu, MoreVertical,
+} from 'lucide-react'
 import { transform } from 'sucrase'
 import VisualizerHeader from './visualizer/VisualizerHeader'
 import EditorPanel from './visualizer/EditorPanel'
@@ -36,15 +42,21 @@ const DEFAULT_FORMULA_STATE = {
   },
 }
 
-const transformCode = (code) => transform(code, { transforms: ['jsx'] }).code
-
-const lucideComponents = Object.fromEntries(
-  Object.entries(LucideIcons).filter(([key]) => /^[A-Z]/.test(key))
-)
+const transformCode = (code) => {
+  try {
+    return transform(code, { transforms: ['jsx'] }).code
+  } catch {
+    return code
+  }
+}
 
 const LIVE_SCOPE = {
   React, useState, useEffect, useCallback, useRef, useMemo, useReducer,
-  ...lucideComponents,
+  ArrowRight, ArrowLeft, ArrowUp, ArrowDown, Check, X, Plus, Minus,
+  Search, Settings, Home, User, Bell, Mail, Heart, Star, Trash2, Edit3,
+  Download, Upload, Copy, ExternalLink, ChevronRight, ChevronLeft,
+  ChevronDown, ChevronUp, Info, AlertCircle, Zap, Code2, FileText,
+  Folder, Image, Lock, RefreshCw, Eye, EyeOff, Menu, MoreVertical,
 }
 
 export default function JsxVisualizer() {
@@ -64,12 +76,12 @@ export default function JsxVisualizer() {
     setFormulaState(prev => ({ ...prev, formula }))
   }
 
-  function handleVarsChange(updater) {
+  const handleVarsChange = useCallback((updater) => {
     setFormulaState(prev => ({
       ...prev,
       vars: typeof updater === 'function' ? updater(prev.vars) : updater,
     }))
-  }
+  }, [])
 
   function handleSave(name) {
     if (mode === 'jsx') {

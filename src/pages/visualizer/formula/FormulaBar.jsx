@@ -16,8 +16,9 @@ export default function FormulaBar({ formula, onFormulaChange }) {
 
   return (
     <div className="flex items-center gap-3 px-4 py-3 bg-gray-900 border-b border-gray-800">
-      <label className="text-sm text-gray-400 shrink-0">Preset</label>
+      <label htmlFor="formula-preset" className="text-sm text-gray-400 shrink-0">Preset</label>
       <select
+        id="formula-preset"
         defaultValue=""
         onChange={handlePreset}
         className="text-sm bg-gray-800 text-gray-300 border border-gray-700 rounded-md px-2 py-1.5 hover:border-gray-600 focus:outline-none focus:border-indigo-500"
@@ -28,8 +29,9 @@ export default function FormulaBar({ formula, onFormulaChange }) {
         ))}
       </select>
 
-      <label className="text-sm text-gray-400 shrink-0">Formula</label>
+      <label htmlFor="formula-input" className="text-sm text-gray-400 shrink-0">Formula</label>
       <input
+        id="formula-input"
         type="text"
         value={formula}
         onChange={e => onFormulaChange(e.target.value)}

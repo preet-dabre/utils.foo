@@ -8,7 +8,11 @@ function loadFromStorage() {
 }
 
 function persist(saves) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(saves))
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(saves))
+  } catch (e) {
+    console.warn(`[useSaves] Failed to persist to "${STORAGE_KEY}":`, e)
+  }
 }
 
 export function useSaves() {

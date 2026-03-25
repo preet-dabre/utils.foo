@@ -1,16 +1,20 @@
 import { evaluate } from 'mathjs'
-import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
-} from 'recharts'
+import OptimizedChart from '../../../components/OptimizedChart'
 
 const POINTS = 80
 
 export default function SweepChart({ formula, vars, sweepVar, onSweepVarChange }) {
   const varNames = Object.keys(vars)
 
-  if (!formula || varNames.length === 0) return null
+  if (
+    !formula ||
+    varNames.length === 0 ||
+    !vars[sweepVar] ||
+    typeof vars[sweepVar].min !== 'number' ||
+    typeof vars[sweepVar].max !== 'number'
+  ) return null
 
-  const { min, max } = vars[sweepVar] || {}
+  const { min, max } = vars[sweepVar]
 
   let data = []
   let sweepError = null
@@ -23,11 +27,48 @@ export default function SweepChart({ formula, vars, sweepVar, onSweepVarChange }
       for (const [k, cfg] of Object.entries(vars)) scope[k] = k === sweepVar ? x : cfg.value
       const y = evaluate(formula, scope)
       if (typeof y === 'number' && isFinite(y)) {
-        data.push({ x: parseFloat(x.toFixed(4)), y: parseFloat(y.toFixed(6)) })
+        data.push([parseFloat(x.toFixed(4)), parseFloat(y.toFixed(6))])
       }
     }
   } catch (e) {
     sweepError = e.message
+  }
+
+  const option = {
+    grid: { top: 8, right: 16, bottom: 36, left: 56 },
+    xAxis: {
+      type: 'value',
+      name: sweepVar,
+      nameLocation: 'end',
+      nameTextStyle: { color: '#6b7280', fontSize: 11 },
+      axisLabel: { color: '#9ca3af', fontSize: 11 },
+      axisLine: { lineStyle: { color: '#374151' } },
+      splitLine: { lineStyle: { color: '#374151', type: 'dashed' } },
+    },
+    yAxis: {
+      type: 'value',
+      axisLabel: { color: '#9ca3af', fontSize: 11 },
+      axisLine: { lineStyle: { color: '#374151' } },
+      splitLine: { lineStyle: { color: '#374151', type: 'dashed' } },
+    },
+    tooltip: {
+      trigger: 'axis',
+      backgroundColor: '#1f2937',
+      borderColor: '#374151',
+      borderRadius: 6,
+      textStyle: { fontSize: 12, color: '#e5e7eb' },
+      formatter: params => {
+        const p = params[0]
+        return `${sweepVar} = ${p.data[0]}<br/>result = ${p.data[1]}`
+      },
+    },
+    series: [{
+      type: 'line',
+      data,
+      smooth: false,
+      lineStyle: { color: '#6366f1', width: 2 },
+      symbol: 'none',
+    }],
   }
 
   return (
@@ -48,23 +89,7 @@ export default function SweepChart({ formula, vars, sweepVar, onSweepVarChange }
       ) : data.length === 0 ? (
         <p className="text-xs text-gray-500 italic">No plottable data.</p>
       ) : (
-        <ResponsiveContainer width="100%" height={220}>
-          <LineChart data={data} margin={{ top: 4, right: 8, left: 0, bottom: 4 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-            <XAxis
-              dataKey="x"
-              tick={{ fill: '#9ca3af', fontSize: 11 }}
-              label={{ value: sweepVar, position: 'insideBottomRight', offset: -4, fill: '#6b7280', fontSize: 11 }}
-            />
-            <YAxis tick={{ fill: '#9ca3af', fontSize: 11 }} width={50} />
-            <Tooltip
-              contentStyle={{ background: '#1f2937', border: '1px solid #374151', borderRadius: 6, fontSize: 12 }}
-              labelFormatter={v => `${sweepVar} = ${v}`}
-              formatter={v => [v, 'result']}
-            />
-            <Line type="monotone" dataKey="y" stroke="#6366f1" dot={false} strokeWidth={2} />
-          </LineChart>
-        </ResponsiveContainer>
+        <OptimizedChart option={option} style={{ height: 220 }} />
       )}
     </div>
   )

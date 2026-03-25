@@ -41,6 +41,7 @@ export default function VisualizerHeader({ onReset, mode, onModeChange, onToggle
         {/* Saves */}
         <button
           onClick={onToggleSaves}
+          aria-label={`Saves, ${savesCount}`}
           className="relative flex items-center gap-2 px-3 py-1.5 text-sm text-gray-400 hover:text-white bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-md transition-colors"
         >
           <BookMarked size={14} />

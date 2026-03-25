@@ -32,6 +32,8 @@ function VarRow({ name, config, onChange, onConfigChange }) {
           <div className="flex items-center bg-gray-800 border border-gray-700 rounded overflow-hidden">
             <button
               onClick={() => setInputMode('slider')}
+              aria-label="Slider input"
+              aria-pressed={inputMode === 'slider'}
               className={`p-1 transition-colors ${inputMode === 'slider' ? 'bg-gray-700 text-indigo-400' : 'text-gray-600 hover:text-gray-400'}`}
               title="Slider"
             >
@@ -39,6 +41,8 @@ function VarRow({ name, config, onChange, onConfigChange }) {
             </button>
             <button
               onClick={handleSwitchToInput}
+              aria-label="Number input"
+              aria-pressed={inputMode === 'input'}
               className={`p-1 transition-colors ${inputMode === 'input' ? 'bg-gray-700 text-indigo-400' : 'text-gray-600 hover:text-gray-400'}`}
               title="Number input"
             >
@@ -48,6 +52,8 @@ function VarRow({ name, config, onChange, onConfigChange }) {
 
           <button
             onClick={() => setShowConfig(v => !v)}
+            aria-label="Configure range"
+            aria-pressed={showConfig}
             className={`p-0.5 rounded transition-colors ${showConfig ? 'text-indigo-400' : 'text-gray-600 hover:text-gray-400'}`}
             title="Configure range"
           >
